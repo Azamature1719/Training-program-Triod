@@ -1,0 +1,11 @@
+clickablelabel.o
+demonstration.o
+exam.o
+main.o
+mainwindow.o
+theory.o
+moc_clickablelabel.o
+moc_demonstration.o
+moc_exam.o
+moc_mainwindow.o
+moc_theory.o
