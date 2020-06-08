@@ -2,6 +2,9 @@
 #define PRAKTIKUM_H
 
 #include <QWidget>
+#include <QLabel>
+#include "clickablelabel.h"
+#include "electrochain.h"
 
 namespace Ui {
 class Demonstration;
@@ -20,9 +23,31 @@ signals:
 
 private slots:
     void on_goMenu_clicked();
+    void on_PlusMinus_clicked();
+    void on_MinusPlus_clicked();
+    void on_ResistGridSlider_valueChanged(int value);
+    void on_UoltAnodSlider_valueChanged(int value);
 
 private:
+    ElectroChain Chain;
+
+    // Физические параметры
+    Connection connectCur;
+
+    // Параметры отрисовки
     Ui::Demonstration *ui;
+    QPixmap *minusPlus = new QPixmap,
+            *plusMinus = new QPixmap;
+
+    // Функции отрисовки
+    void setConnectionIcons(); // -- загрузка изображений типа подключения --
+    void setResistSliderView();// -- установка параметры ползунка сопротивления --
+    void setUoltSliderView();  // -- установка параметры ползунка напряжения --
+    void setFisrtAnodChars();  //
+    void chosenPolar(ClickableLabel &on, ClickableLabel &off);  // -- выбрано подключение --
+    void chosenPlusMinus();    // -- выбран тип подключения (+-) --
+    void chosenMinusPlus();    // -- выбран тип подключения (-+) --
+    void changeAnodGridChar(); // -- изменяется напряжение на сетке и сила тока --
 };
 
 #endif // PRAKTIKUM_H

@@ -20,8 +20,6 @@ private slots:
     void on_goMenu_clicked();
     void on_goTheory_clicked();
     void on_goDemo_clicked();
-    void on_goTest_clicked();
-
     void on_goExam_clicked();
 
 private:
