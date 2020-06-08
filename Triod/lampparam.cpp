@@ -4,24 +4,14 @@ LampParam::LampParam()
     : ResistGrid(), UoltGrid(),Slope(), InResist(), LastUoltGrid()
 {}
 
-void LampParam::SetResistGrid(const int &outResist)
-{
-    ResistGrid = outResist;
-}
-
-int LampParam::GetResistGrid()
-{
-    return ResistGrid;
-}
-
 void LampParam::SetCurConnection(const Connection &outConnection)
 {
     curConnection = outConnection;
 }
 
-Connection LampParam::GetCurConnection()
+void LampParam::SetResistGrid(const int &outResist)
 {
-    return curConnection;
+    ResistGrid = outResist;
 }
 
 void LampParam::SetUoltGrid()
@@ -40,22 +30,52 @@ void LampParam::SetUoltGrid()
     }
 }
 
+void LampParam::SetInResist(double ChainInResist)
+{
+    InResist = ChainInResist;
+}
+
+void LampParam::ChangeLastUoltGrid()
+{
+    LastUoltGrid = UoltGrid;
+}
+
+void LampParam::FindSlope(double DifferenceIntense)
+{
+    Slope = (DifferenceIntense / (LastUoltGrid - UoltGrid));
+}
+
+void LampParam::FindForce()
+{
+    CoForce = Slope*ResistGrid;
+}
+
+Connection LampParam::GetCurConnection()
+{
+    return curConnection;
+}
+
+int LampParam::GetResistGrid()
+{
+    return ResistGrid;
+}
+
 double LampParam::GetUoltGrid()
 {
     return UoltGrid;
 }
 
-int LampParam::FindSlope()
+double LampParam::GetSlope()
 {
-
+    return Slope;
 }
 
-int LampParam::FindForce()
+double LampParam::GetCoForce()
 {
-    return Slope*ResistGrid;
+    return CoForce;
 }
 
-int LampParam::FindInResist()
+double LampParam::GetInResist()
 {
-
+    return InResist;
 }

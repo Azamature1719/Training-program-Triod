@@ -15,9 +15,15 @@ class ElectroChain
 public:
     ElectroChain();
     void SetUoltAnod(const int&);
+    void ChangeLast();
     void FindIntenseForce();
-    int GetUoltAnod();
+    void FindInResist(); // Рассчёт внутреннего сопротивления лампы, результат помещается в Lamp.ResistIn
+    int  GetUoltAnod();
     double GetIntenseForce();
+
+    // Получить разницу значений текущего и прошлого значений
+    int  GetUoltDifference();
+    double GetIntenseDifference();
 
 public:
     LampParam Lamp;

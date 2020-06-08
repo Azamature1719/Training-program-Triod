@@ -47,21 +47,43 @@ void Demonstration::chosenPolar(ClickableLabel &on, ClickableLabel &off)
                                  "}");
 }
 
-void Demonstration::changeAnodGridChar()
+double Demonstration::correctFloor(double value)
 {
+    return (floor(value * 10 + 0.5) / 10);
+}
+
+void Demonstration::changePhysics()
+{
+    // Запомнить предыдущие значения
+    Chain.ChangeLast();
+    Chain.Lamp.ChangeLastUoltGrid();
+
+    // Установить новые значения параметров
     Chain.Lamp.SetUoltGrid();
     Chain.FindIntenseForce();
 
-    double newUoltGrid = floor(Chain.Lamp.GetUoltGrid() * 10 + 0.5) / 10,
-           newIntenseForce = floor(Chain.GetIntenseForce() * 10 + 0.5) / 10;
+    double newUoltGrid = correctFloor(Chain.Lamp.GetUoltGrid()),
+           newIntenseForce = correctFloor(Chain.GetIntenseForce());
 
     ui->UoltGridLbl->setNum(newUoltGrid);
-
-    if(newIntenseForce != newIntenseForce)
-    {
+    if(newIntenseForce != newIntenseForce) // -- Чтобы не выводилось NaN --
         newIntenseForce = 0;
-    }
     ui->IntenseForceLbl->setNum(newIntenseForce);
+}
+
+void Demonstration::setAnodGridChars()
+{
+    Chain.Lamp.FindSlope(Chain.GetIntenseDifference());
+    Chain.Lamp.FindForce();
+    Chain.FindInResist();
+
+    double newSlope = correctFloor(Chain.Lamp.GetSlope()),
+           newForce = correctFloor(Chain.Lamp.GetCoForce()),
+           newInResist = correctFloor(Chain.Lamp.GetInResist());
+
+    ui->SlopeResultLbl->setNum(newSlope);
+    ui->ForceResultLbl->setNum(newForce);
+    ui->ResistInResultLbl->setNum(newInResist);
 }
 
 void Demonstration::chosenMinusPlus()
@@ -69,7 +91,7 @@ void Demonstration::chosenMinusPlus()
     Chain.Lamp.SetCurConnection(Connection::minus);
     chosenPolar(*(ui->MinusPlus), *(ui->PlusMinus));
     ui->ResistGridSlider->setRange(0, 400);
-    changeAnodGridChar();
+    changePhysics();
 }
 
 void Demonstration::chosenPlusMinus()
@@ -77,7 +99,7 @@ void Demonstration::chosenPlusMinus()
     Chain.Lamp.SetCurConnection(Connection::plus);
     chosenPolar(*(ui->PlusMinus), *(ui->MinusPlus));
     ui->ResistGridSlider->setRange(0, 160);
-    changeAnodGridChar();
+    changePhysics();
 }
 
 void Demonstration::setResistSliderView()
@@ -117,12 +139,14 @@ void Demonstration::on_ResistGridSlider_valueChanged(int value)
 {
     Chain.Lamp.SetResistGrid(value);
     ui->ResistGridLbl->setNum(value);
-    changeAnodGridChar();
+    changePhysics();
+    setAnodGridChars();
 }
 
 void Demonstration::on_UoltAnodSlider_valueChanged(int value)
 {
     Chain.SetUoltAnod(value);
     ui->UoltAnodLbl->setNum(value);
-    changeAnodGridChar();
+    changePhysics();
+    setAnodGridChars();
 }

@@ -11,8 +11,9 @@ class LampParam
 {
    int ResistGrid;
    double UoltGrid;
-   int Slope;
-   int InResist;
+   double Slope;
+   double CoForce;
+   double InResist;
    Connection curConnection;
 
    // Для вычисления характеристик триода
@@ -25,18 +26,24 @@ public:
     void SetResistGrid(const int&);
     void SetUoltGrid();
     void SetCurConnection(const Connection&);
+    void ChangeLastUoltGrid();
 
     // Получить параметры триода
-    int GetResistGrid();
+    int    GetResistGrid();
     double GetUoltGrid();
     int GetCoefficientForce();
     double GetCoefficientA();
     Connection GetCurConnection();
 
     // Рассчитать анодно-сеточные характеристики триода
-    int FindSlope();
-    int FindForce();
-    int FindInResist();
+    void FindSlope(double DifferenceForce); // Рассчёт крутизны лампы
+    void FindForce(); // Рассчёт коэффициента усиления
+    void SetInResist(double ChainInResist); // Рассчитывается внутри класса ЭлектроЦепь
+
+    // Получить анодно-сеточные характеристики
+    double GetSlope();
+    double GetCoForce();
+    double GetInResist();
 
 public:
     const double SingleStep = 80.0;

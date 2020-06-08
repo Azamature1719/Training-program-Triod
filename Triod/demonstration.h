@@ -40,14 +40,15 @@ private:
             *plusMinus = new QPixmap;
 
     // ‘ункции отрисовки
+    double correctFloor(double value); // -- округлить до 2ух знаков --
     void setConnectionIcons(); // -- загрузка изображений типа подключени€ --
     void setResistSliderView();// -- установка параметры ползунка сопротивлени€ --
     void setUoltSliderView();  // -- установка параметры ползунка напр€жени€ --
-    void setFisrtAnodChars();  //
+    void setAnodGridChars();   // -- установка значений анодно-сеточных характеристик --
     void chosenPolar(ClickableLabel &on, ClickableLabel &off);  // -- выбрано подключение --
     void chosenPlusMinus();    // -- выбран тип подключени€ (+-) --
     void chosenMinusPlus();    // -- выбран тип подключени€ (-+) --
-    void changeAnodGridChar(); // -- измен€етс€ напр€жение на сетке и сила тока --
+    void changePhysics();      // -- измен€етс€ напр€жение на сетке и сила тока --
 };
 
 #endif // PRAKTIKUM_H
