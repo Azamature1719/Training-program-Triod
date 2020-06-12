@@ -1,17 +1,24 @@
-#include "demonstration.h"
+ï»¿#include "demonstration.h"
 #include "ui_demonstration.h"
 
+#include <QGraphicsItem>
 #include <QPainter>
 #include <QBitmap>
 #include <QDebug>
-
+#include <QtSvg>
 #include <cmath>
+#include <iostream>
+#include <sstream>
 
 Demonstration::Demonstration(QWidget *parent) : QWidget(parent), ui(new Ui::Demonstration)
 {
     ui->setupUi(this);
+    TriodDemo = new TriodLamp(ui->graphicsView->rect());
+    ui->graphicsView->setScene(TriodDemo);
+    ui->graphicsView->setRenderHints(QPainter::Antialiasing);
+    ui->graphicsView->show();
 
-    // Óñòàíîâèòü ïåðâè÷íûå ïàðàìåòðû âûâîäà
+    // Ð£ÑÑ‚Ð°Ð½Ð¾Ð²Ð¸Ñ‚ÑŒ Ð¿ÐµÑ€Ð²Ð¸Ñ‡Ð½Ñ‹Ðµ Ð¿Ð°Ñ€Ð°Ð¼ÐµÑ‚Ñ€Ñ‹ Ð²Ñ‹Ð²Ð¾Ð´Ð°
     setConnectionIcons();
     setResistSliderView();
     setUoltSliderView();
@@ -35,6 +42,7 @@ void Demonstration::setConnectionIcons()
     ui->PlusMinus->setPixmap(*plusMinus);
 }
 
+
 void Demonstration::chosenPolar(ClickableLabel &on, ClickableLabel &off)
 {
     on.setStyleSheet("QLabel {"
@@ -47,43 +55,53 @@ void Demonstration::chosenPolar(ClickableLabel &on, ClickableLabel &off)
                                  "}");
 }
 
-double Demonstration::correctFloor(double value)
-{
-    return (floor(value * 10 + 0.5) / 10);
-}
-
 void Demonstration::changePhysics()
 {
-    // Çàïîìíèòü ïðåäûäóùèå çíà÷åíèÿ
-    Chain.ChangeLast();
-    Chain.Lamp.ChangeLastUoltGrid();
-
-    // Óñòàíîâèòü íîâûå çíà÷åíèÿ ïàðàìåòðîâ
+    // Ð£ÑÑ‚Ð°Ð½Ð¾Ð²Ð¸Ñ‚ÑŒ Ð½Ð¾Ð²Ñ‹Ðµ Ð·Ð½Ð°Ñ‡ÐµÐ½Ð¸Ñ Ð¿Ð°Ñ€Ð°Ð¼ÐµÑ‚Ñ€Ð¾Ð²
     Chain.Lamp.SetUoltGrid();
     Chain.FindIntenseForce();
+    Chain.Lamp.SetLampMode(Chain.GetIntenseForce());
 
-    double newUoltGrid = correctFloor(Chain.Lamp.GetUoltGrid()),
-           newIntenseForce = correctFloor(Chain.GetIntenseForce());
-
-    ui->UoltGridLbl->setNum(newUoltGrid);
-    if(newIntenseForce != newIntenseForce) // -- ×òîáû íå âûâîäèëîñü NaN --
-        newIntenseForce = 0;
-    ui->IntenseForceLbl->setNum(newIntenseForce);
+    ui->UoltGridLbl->setNum(Chain.Lamp.GetUoltGrid());
+    ui->IntenseForceLbl->setNum(Chain.GetIntenseForce());
+    ui->LampMode->setText(Chain.Lamp.GetStrLampMode().c_str());
 }
 
-void Demonstration::setAnodGridChars()
+void Demonstration::setAnodChars()
+{
+    Chain.FindInResist();
+    double newInResist = (Chain.Lamp.GetInResist());
+    ui->ResistInUoltAnodLbl->setNum((Chain.GetUoltDifference()));
+    ui->ResistInForceIntenseLbl->setNum((Chain.GetIntenseDifference()));
+    // Ð—Ð°Ð¼ÐµÐ½Ð¸Ñ‚ÑŒ Ð·Ð½Ð°Ñ‡ÐµÐ½Ð¸Ñ, ÐµÑÐ»Ð¸ Ð»Ð°Ð¼Ð¿Ð° Ð·Ð°Ð¿ÐµÑ€Ñ‚Ð°
+    if(Chain.GetIntenseForce() == 0)
+    {
+        ui->ResistInResultLbl->setText("-");  // Ð¡Ð°Ð¼ InResist Ð¿Ñ€Ð¸ Ñ€Ð°ÑÑÑ‡Ñ‘Ñ‚Ðµ Ð·Ð°Ð¼ÐµÐ½ÑÐµÑ‚ÑÑ NaN Ð½Ð° 0
+    }
+    else
+    {
+        ui->ResistInResultLbl->setNum(newInResist);
+    }
+}
+
+void Demonstration::setGridChars()
 {
     Chain.Lamp.FindSlope(Chain.GetIntenseDifference());
     Chain.Lamp.FindForce();
-    Chain.FindInResist();
 
-    double newSlope = correctFloor(Chain.Lamp.GetSlope()),
-           newForce = correctFloor(Chain.Lamp.GetCoForce()),
-           newInResist = correctFloor(Chain.Lamp.GetInResist());
+    double newSlope = (Chain.Lamp.GetSlope()),
+           newForce = (Chain.Lamp.GetCoForce());
 
+    // Ð£ÑÑ‚Ð°Ð½Ð¾Ð²Ð¸Ñ‚ÑŒ Ð¿Ñ€Ð¾Ð¼ÐµÐ¶ÑƒÑ‚Ð¾Ñ‡Ð½Ñ‹Ðµ Ð·Ð½Ð°Ñ‡ÐµÐ½Ð¸Ñ
+    ui->SlopeIntenseLbl->setNum((Chain.GetIntenseDifference()));
+    ui->SlopeUoltLbl->setNum((Chain.Lamp.GetUoltGridDifference()));
+
+    ui->ForceResistLbl->setNum(Chain.Lamp.GetResistGrid());
+    ui->ForceSlopeLbl->setNum(newSlope);
+
+    // Ð£ÑÑ‚Ð°Ð½Ð¾Ð²Ð¸Ñ‚ÑŒ Ñ€ÐµÐ·ÑƒÐ»ÑŒÑ‚Ð°Ñ‚Ñ‹
     ui->SlopeResultLbl->setNum(newSlope);
     ui->ForceResultLbl->setNum(newForce);
-    ui->ResistInResultLbl->setNum(newInResist);
 }
 
 void Demonstration::chosenMinusPlus()
@@ -137,16 +155,22 @@ void Demonstration::on_PlusMinus_clicked()
 
 void Demonstration::on_ResistGridSlider_valueChanged(int value)
 {
+    Chain.SetLastIntenseForce();
+    Chain.Lamp.ChangeLastUoltGrid();
+
     Chain.Lamp.SetResistGrid(value);
     ui->ResistGridLbl->setNum(value);
     changePhysics();
-    setAnodGridChars();
+    setGridChars();
 }
 
 void Demonstration::on_UoltAnodSlider_valueChanged(int value)
 {
+    Chain.SetLastUoltAnod();
+    Chain.SetLastIntenseForce();
+
     Chain.SetUoltAnod(value);
     ui->UoltAnodLbl->setNum(value);
     changePhysics();
-    setAnodGridChars();
+    setAnodChars();
 }

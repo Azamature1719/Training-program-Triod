@@ -1,49 +1,58 @@
-#ifndef LAMPPARAM_H
+п»ї#ifndef LAMPPARAM_H
 #define LAMPPARAM_H
 
-enum class Connection
-{
-    minus,
-    plus
-};
+#include <iostream>
+#include "commonenum.h"
 
 class LampParam
 {
    int ResistGrid;
    double UoltGrid;
+
    double Slope;
    double CoForce;
    double InResist;
    Connection curConnection;
+   LampMode curMode;
+   std::string strCurMode;
 
-   // Для вычисления характеристик триода
+   // Р”Р»СЏ РІС‹С‡РёСЃР»РµРЅРёСЏ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРє С‚СЂРёРѕРґР°
    double LastUoltGrid;
 
 public:
     LampParam();
 
-    // Установить параметры триода
+    // РЈСЃС‚Р°РЅРѕРІРёС‚СЊ РїР°СЂР°РјРµС‚СЂС‹ С‚СЂРёРѕРґР°
     void SetResistGrid(const int&);
     void SetUoltGrid();
-    void SetCurConnection(const Connection&);
+    void SetCurConnection(const Connection);
+    void SetLampMode(const double IntenseForce);
     void ChangeLastUoltGrid();
 
-    // Получить параметры триода
+    // РџРѕР»СѓС‡РёС‚СЊ РїР°СЂР°РјРµС‚СЂС‹ С‚СЂРёРѕРґР°
+    Connection  GetCurConnection();
+    LampMode    GetLampMode();
+    std::string GetStrLampMode();
     int    GetResistGrid();
     double GetUoltGrid();
-    int GetCoefficientForce();
+    int    GetCoefficientForce();
     double GetCoefficientA();
-    Connection GetCurConnection();
 
-    // Рассчитать анодно-сеточные характеристики триода
-    void FindSlope(double DifferenceForce); // Рассчёт крутизны лампы
-    void FindForce(); // Рассчёт коэффициента усиления
-    void SetInResist(double ChainInResist); // Рассчитывается внутри класса ЭлектроЦепь
+    // Р Р°СЃСЃС‡РёС‚Р°С‚СЊ Р°РЅРѕРґРЅРѕ-СЃРµС‚РѕС‡РЅС‹Рµ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё С‚СЂРёРѕРґР°
+    void FindSlope(double DifferenceForce); // Р Р°СЃСЃС‡С‘С‚ РєСЂСѓС‚РёР·РЅС‹ Р»Р°РјРїС‹
+    void FindForce();                       // Р Р°СЃСЃС‡С‘С‚ РєРѕСЌС„С„РёС†РёРµРЅС‚Р° СѓСЃРёР»РµРЅРёСЏ
+    void SetInResist(double ChainInResist); // Р Р°СЃСЃС‡РёС‚С‹РІР°РµС‚СЃСЏ РІРЅСѓС‚СЂРё РєР»Р°СЃСЃР° Р­Р»РµРєС‚СЂРѕР¦РµРїСЊ
 
-    // Получить анодно-сеточные характеристики
+    // РџСЂРѕРјРµР¶СѓС‚РѕС‡РЅС‹Рµ Р·РЅР°С‡РµРЅРёСЏ РђРЎРҐ
+    double GetUoltGridDifference();
+
+    // РџРѕР»СѓС‡РёС‚СЊ Р°РЅРѕРґРЅРѕ-СЃРµС‚РѕС‡РЅС‹Рµ С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё
     double GetSlope();
     double GetCoForce();
     double GetInResist();
+
+    // Р’СЃРїРѕРјРѕРіР°С‚РµР»СЊРЅС‹Рµ С„СѓРЅРєС†РёРё
+    double CorrectFloor(double value);
 
 public:
     const double SingleStep = 80.0;

@@ -3,8 +3,12 @@
 
 #include <QWidget>
 #include <QLabel>
+#include <QtSvg>
+#include <QGraphicsScene>
 #include "clickablelabel.h"
+#include "commonenum.h"
 #include "electrochain.h"
+#include "triodlamp.h"
 
 namespace Ui {
 class Demonstration;
@@ -30,6 +34,7 @@ private slots:
 
 private:
     ElectroChain Chain;
+    TriodLamp *TriodDemo;
 
     // ‘изические параметры
     Connection connectCur;
@@ -40,11 +45,11 @@ private:
             *plusMinus = new QPixmap;
 
     // ‘ункции отрисовки
-    double correctFloor(double value); // -- округлить до 2ух знаков --
     void setConnectionIcons(); // -- загрузка изображений типа подключени€ --
     void setResistSliderView();// -- установка параметры ползунка сопротивлени€ --
     void setUoltSliderView();  // -- установка параметры ползунка напр€жени€ --
-    void setAnodGridChars();   // -- установка значений анодно-сеточных характеристик --
+    void setAnodChars();       // -- установка значений анодных характеристик --
+    void setGridChars();       // -- установка значений сеточных характеристик --
     void chosenPolar(ClickableLabel &on, ClickableLabel &off);  // -- выбрано подключение --
     void chosenPlusMinus();    // -- выбран тип подключени€ (+-) --
     void chosenMinusPlus();    // -- выбран тип подключени€ (-+) --

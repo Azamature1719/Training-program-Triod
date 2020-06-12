@@ -8,7 +8,6 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
     connect(ui->theoryPage, SIGNAL(back_toMenu()), this, SLOT(on_goMenu_clicked()));
     connect(ui->demoPage, SIGNAL(back_toMenu()), this, SLOT(on_goMenu_clicked()));
     connect(ui->examPage, SIGNAL(back_toMenu()), this, SLOT(on_goMenu_clicked()));
@@ -37,4 +36,9 @@ void MainWindow::on_goDemo_clicked()
 void MainWindow::on_goExam_clicked()
 {
     ui->stackedWidget->setCurrentWidget(ui->examPage);
+}
+
+void MainWindow::on_goTheory_linkHovered(const QString &link)
+{
+    ui->goTheory->setStyleSheet("QLabel { background-color : lightgrey; }");
 }

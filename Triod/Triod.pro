@@ -1,4 +1,5 @@
 QT       += core gui
+QT       += svg
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -17,22 +18,28 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     clickablelabel.cpp \
+    cloud.cpp \
     demonstration.cpp \
     electrochain.cpp \
+    electron.cpp \
     exam.cpp \
     lampparam.cpp \
     main.cpp \
     mainwindow.cpp \
-    theory.cpp
+    theory.cpp \
+    triodlamp.cpp
 
 HEADERS += \
     clickablelabel.h \
+    cloud.h \
+    commonenum.h \
     demonstration.h \
     electrochain.h \
     exam.h \
     lampparam.h \
     mainwindow.h \
-    theory.h
+    theory.h \
+    triodlamp.h
 
 FORMS += \
     demonstration.ui \

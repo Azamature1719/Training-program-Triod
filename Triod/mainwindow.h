@@ -22,6 +22,8 @@ private slots:
     void on_goDemo_clicked();
     void on_goExam_clicked();
 
+    void on_goTheory_linkHovered(const QString &link);
+
 private:
     Ui::MainWindow *ui;
 };
