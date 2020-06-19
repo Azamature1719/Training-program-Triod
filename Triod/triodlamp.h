@@ -2,12 +2,15 @@
 #define TRIODLAMP_H
 
 #include <QObject>
+#include <QPropertyAnimation>
 #include <QtSvg>
 #include <QGraphicsScene>
 #include <QStateMachine>
+#include <QList>
 #include <QDebug>
 #include "commonenum.h"
 #include "lampparam.h"
+#include "electron.h"
 
 class TriodLamp: public QGraphicsScene
 {
@@ -20,18 +23,28 @@ private:
     void setupPictures();
     void setPlus();
     void setMinus();
-    void forward();
+    void fillAnimation();
 
-private:
+public:
     QRect *boundaries,
           *cloudBound;
+    void animationGo();
+
+private:
+    int error = 5;
+    QSize *electronSize;
     QPixmap *signPix;
-    QState *normal;
+
+    QState *operatingCurrent;
+    QStateMachine *currentFlow;
+
+    Electron *electron;
+    QList<Electron*> electroStream;
+    QList<QPropertyAnimation*> animaStream;
+
     QGraphicsSvgItem *frame;
-    QGraphicsPixmapItem *electron;
     QGraphicsPixmapItem *sign;
     QGraphicsEllipseItem *cloud;
-
 };
 
 #endif // TRIODLAMP_H

@@ -15,7 +15,7 @@ Demonstration::Demonstration(QWidget *parent) : QWidget(parent), ui(new Ui::Demo
     ui->setupUi(this);
     TriodDemo = new TriodLamp(ui->graphicsView->rect());
     ui->graphicsView->setScene(TriodDemo);
-    ui->graphicsView->setRenderHints(QPainter::Antialiasing);
+    ui->graphicsView->setRenderHints(QPainter::RenderHint::HighQualityAntialiasing);
     ui->graphicsView->show();
 
     // Установить первичные параметры вывода
@@ -73,8 +73,7 @@ void Demonstration::setAnodChars()
     double newInResist = (Chain.Lamp.GetInResist());
     ui->ResistInUoltAnodLbl->setNum((Chain.GetUoltDifference()));
     ui->ResistInForceIntenseLbl->setNum((Chain.GetIntenseDifference()));
-    // Заменить значения, если лампа заперта
-    if(Chain.GetIntenseForce() == 0)
+    if(Chain.GetIntenseForce() == 0)  // Заменить значения, если лампа заперта
     {
         ui->ResistInResultLbl->setText("-");  // Сам InResist при рассчёте заменяется NaN на 0
     }
@@ -173,4 +172,11 @@ void Demonstration::on_UoltAnodSlider_valueChanged(int value)
     ui->UoltAnodLbl->setNum(value);
     changePhysics();
     setAnodChars();
+}
+
+void Demonstration::on_pushButton_clicked()
+{
+    TriodDemo->animationGo();
+    ui->graphicsView->setScene(TriodDemo);
+    ui->graphicsView->show();
 }

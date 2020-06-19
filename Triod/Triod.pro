@@ -35,6 +35,7 @@ HEADERS += \
     commonenum.h \
     demonstration.h \
     electrochain.h \
+    electron.h \
     exam.h \
     lampparam.h \
     mainwindow.h \

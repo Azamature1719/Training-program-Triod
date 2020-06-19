@@ -66,7 +66,6 @@ void LampParam::SetLampMode(const double IntenseForce)
         curMode = LampMode::opened;
         strCurMode = "Лампа отперта";
     }
-
 }
 
 void LampParam::ChangeLastUoltGrid()

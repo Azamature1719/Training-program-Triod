@@ -588,7 +588,7 @@
     <widget class="ClickableLabel" name="PlusMinus">
      <property name="geometry">
       <rect>
-       <x>660</x>
+       <x>680</x>
        <y>170</y>
        <width>41</width>
        <height>201</height>
@@ -612,7 +612,7 @@
     <widget class="ClickableLabel" name="MinusPlus">
      <property name="geometry">
       <rect>
-       <x>590</x>
+       <x>610</x>
        <y>170</y>
        <width>41</width>
        <height>201</height>
@@ -833,7 +833,7 @@
       <rect>
        <x>350</x>
        <y>240</y>
-       <width>221</width>
+       <width>241</width>
        <height>41</height>
       </rect>
      </property>
@@ -1397,6 +1397,19 @@
         <blue>0</blue>
        </color>
       </brush>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton">
+     <property name="geometry">
+      <rect>
+       <x>380</x>
+       <y>320</y>
+       <width>181</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>PushButton</string>
      </property>
     </widget>
    </widget>

@@ -32,6 +32,8 @@ private slots:
     void on_ResistGridSlider_valueChanged(int value);
     void on_UoltAnodSlider_valueChanged(int value);
 
+    void on_pushButton_clicked();
+
 private:
     ElectroChain Chain;
     TriodLamp *TriodDemo;
