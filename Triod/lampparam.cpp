@@ -38,33 +38,30 @@ void LampParam::SetInResist(double ChainInResist)
 
 void LampParam::SetLampMode(const double IntenseForce)
 {
-    if(IntenseForce - 2 < 0.0001)
+    prevCurMode = curMode;
+
+    if(IntenseForce - 0.5 < 0.0001)
     {
         curMode = LampMode::closed;
-        strCurMode = "Лампа заперта";
         return;
     }
     if(IntenseForce - 4 < 0.0001)
     {
         curMode = LampMode::almostClosed;
-        strCurMode = "Ток ниже рабочего";
         return;
     }
     if(IntenseForce - 10 < 0.0001)
     {
         curMode = LampMode::working;
-        strCurMode = "Рабочий ток";
         return;
     }
     if(IntenseForce - 12 < 0.0001)
     {
         curMode = LampMode::almostOpened;
-        strCurMode = "Ток выше рабочего";
     }
     else
     {
         curMode = LampMode::opened;
-        strCurMode = "Лампа отперта";
     }
 }
 
@@ -85,7 +82,7 @@ void LampParam::FindForce()
     CoForce = Slope*ResistGrid;
 }
 
-// Физические параметры триода
+/// Физические параметры триода
 Connection LampParam::GetCurConnection()
 {
     return curConnection;
@@ -96,9 +93,9 @@ LampMode LampParam::GetLampMode()
     return curMode;
 }
 
-std::string LampParam::GetStrLampMode()
+LampMode LampParam::GetPrevLampMode()
 {
-    return strCurMode;
+    return prevCurMode;
 }
 
 int LampParam::GetResistGrid()
@@ -111,7 +108,12 @@ double LampParam::GetUoltGrid()
     return UoltGrid;
 }
 
-// Промежуточные значения для АСХ
+double LampParam::GetLastUoltGrid()
+{
+    return LastUoltGrid;
+}
+
+/// Промежуточные значения для АСХ
 double LampParam::GetUoltGridDifference()
 {
     double DifferenceGrid = fabs(UoltGrid - LastUoltGrid);
@@ -119,7 +121,7 @@ double LampParam::GetUoltGridDifference()
     return CorrectFloor(DifferenceGrid);
 }
 
-// Анодно-сеточные характеристики
+/// Анодно-сеточные характеристики
 double LampParam::GetSlope()
 {
     return Slope;
@@ -135,7 +137,7 @@ double LampParam::GetInResist()
     return InResist;
 }
 
-// Округление до двух знаков после запятой
+/// Округление до двух знаков после запятой
 double LampParam::CorrectFloor(double value)
 {
     return (floor(value * 100 + 0.5) / 100);

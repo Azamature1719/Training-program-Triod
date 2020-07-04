@@ -6,6 +6,15 @@ Theory::Theory(QWidget *parent) :
     ui(new Ui::Theory)
 {
     ui->setupUi(this);
+
+    if (!QFile::exists("Files\theory_text.txt"))
+    {
+        QMessageBox::warning(this,"Ошибка","Не удалось открыть файл theory_text.txt");
+    }
+    else
+    {
+        ui->textBrowser->setSource(QUrl("Files\theory_text.txt"));
+    }
 }
 
 Theory::~Theory()

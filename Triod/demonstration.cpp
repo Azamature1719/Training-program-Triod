@@ -2,6 +2,7 @@
 #include "ui_demonstration.h"
 
 #include <QGraphicsItem>
+#include <QPropertyAnimation>
 #include <QPainter>
 #include <QBitmap>
 #include <QDebug>
@@ -14,9 +15,22 @@ Demonstration::Demonstration(QWidget *parent) : QWidget(parent), ui(new Ui::Demo
 {
     ui->setupUi(this);
     TriodDemo = new TriodLamp(ui->graphicsView->rect());
+    ElChainDemo = new ChainDemo(ui->graphicsView_2->rect());
+    minusPlus = new QGraphicsSvgItem("Files/SVG/MinusPlus.svg");
+    plusMinus = new QGraphicsSvgItem("Files/SVG/PlusMinus.svg");
+
     ui->graphicsView->setScene(TriodDemo);
     ui->graphicsView->setRenderHints(QPainter::RenderHint::HighQualityAntialiasing);
     ui->graphicsView->show();
+
+    ui->graphicsView_2->setScene(ElChainDemo);
+    ui->graphicsView->setRenderHints(QPainter::RenderHint::HighQualityAntialiasing);
+    ui->graphicsView->show();
+
+    // Выбрано подключение "минус-плюс"
+    ui->grViewMinus->setStyleSheet("QGraphicsView {"
+                                      "background-color: #B8FFC9;"
+                                      "}");
 
     // Установить первичные параметры вывода
     setConnectionIcons();
@@ -32,27 +46,45 @@ Demonstration::~Demonstration()
 
 void Demonstration::setConnectionIcons()
 {
-    minusPlus->load("C:/Qt/INSTITUTE/build-Triod-Desktop_Qt_5_14_0_MinGW_32_bit-Debug/Files/SVG/MinusPlus.svg");
-    plusMinus->load("C:/Qt/INSTITUTE/build-Triod-Desktop_Qt_5_14_0_MinGW_32_bit-Debug/Files/SVG/PlusMinus.svg");
+    QGraphicsScene *PlusMinus = new QGraphicsScene,
+                   *MinusPlus = new QGraphicsScene;
+    PlusMinus->addItem(plusMinus);
+    MinusPlus->addItem(minusPlus);
 
-    *minusPlus = minusPlus->scaled(30, 180, Qt::KeepAspectRatio);
-    *plusMinus = plusMinus->scaled(30, 180, Qt::KeepAspectRatio);
+    ui->grViewPlus->setScene(PlusMinus);
+    ui->grViewPlus->show();
 
-    ui->MinusPlus->setPixmap(*minusPlus);
-    ui->PlusMinus->setPixmap(*plusMinus);
+    ui->grViewMinus->setScene(MinusPlus);
+    ui->grViewMinus->show();
 }
 
-
-void Demonstration::chosenPolar(ClickableLabel &on, ClickableLabel &off)
+void Demonstration::mousePressEvent(QMouseEvent *event)
 {
-    on.setStyleSheet("QLabel {"
-                                 "border-style: solid;"
-                                 "border-width: 2px;"
-                                 "border-color: lightgreen; "
-                                 "}");
-    off.setStyleSheet("QLabel {"
-                                 "border-width: 0px;"
-                                 "}");
+    QPoint remappedMinus = ui->grViewMinus->mapFromParent(event->pos()),
+           remappedPlus  = ui->grViewPlus->mapFromParent(event->pos());
+
+    if (ui->grViewMinus->rect().contains(remappedMinus))
+    {
+        ui->grViewPlus->setStyleSheet("QGraphicsView {"
+                                          "background-color: #FFFFFF;"
+                                          "}");
+        ui->grViewMinus->setStyleSheet("QGraphicsView {"
+                                          "background-color: #B8FFC9;"
+                                          "}");
+        chosenMinusPlus();
+        return;
+    }
+
+    if (ui->grViewPlus->rect().contains(remappedPlus))
+    {
+        ui->grViewMinus->setStyleSheet("QGraphicsView {"
+                                          "background-color: #FFFFFF;"
+                                          "}");
+        ui->grViewPlus->setStyleSheet("QGraphicsView {"
+                                          "background-color: #B8FFC9;"
+                                          "}");
+        chosenPlusMinus();
+    }
 }
 
 void Demonstration::changePhysics()
@@ -62,25 +94,63 @@ void Demonstration::changePhysics()
     Chain.FindIntenseForce();
     Chain.Lamp.SetLampMode(Chain.GetIntenseForce());
 
+    // Изменить значения триода
     ui->UoltGridLbl->setNum(Chain.Lamp.GetUoltGrid());
+    TriodDemo->changeColourCloud(Chain.Lamp.GetUoltGrid());
+
+    // Изменить значение силы тока
     ui->IntenseForceLbl->setNum(Chain.GetIntenseForce());
-    ui->LampMode->setText(Chain.Lamp.GetStrLampMode().c_str());
+
+    LampMode curMode = Chain.Lamp.GetLampMode();
+    std::string lampState = "";
+    switch(curMode)
+    {
+    case(LampMode::closed):
+        lampState = "Лампа заперта";
+        break;
+
+    case(LampMode::almostClosed):
+        lampState = "Ток ниже рабочего";
+        break;
+
+    case(LampMode::working):
+        lampState = "Рабочий ток";
+        break;
+
+    case(LampMode::almostOpened):
+        lampState = "Ток выше рабочего";
+        break;
+
+    case(LampMode::opened):
+        lampState = "Лампа отперта";
+        break;
+    }
+    ui->LampMode->setText(lampState.c_str());
+
+    if(lastMode != lampState)
+        ui->LampMode->startTransit(Chain.Lamp.GetCurConnection());
+    lastMode = lampState;
+
+    LampMode prevCurMode = Chain.Lamp.GetPrevLampMode();
+    if(curMode != prevCurMode)
+    {
+        emit TriodDemo->signal_SEND(curMode);
+        ElChainDemo->signal_SEND(curMode);
+    }
 }
 
 void Demonstration::setAnodChars()
 {
     Chain.FindInResist();
     double newInResist = (Chain.Lamp.GetInResist());
+
     ui->ResistInUoltAnodLbl->setNum((Chain.GetUoltDifference()));
     ui->ResistInForceIntenseLbl->setNum((Chain.GetIntenseDifference()));
-    if(Chain.GetIntenseForce() == 0)  // Заменить значения, если лампа заперта
-    {
-        ui->ResistInResultLbl->setText("-");  // Сам InResist при рассчёте заменяется NaN на 0
-    }
+
+    if(fabs(Chain.GetIntenseForce()) < 0.00001) // Заменить значения, если лампа заперта
+        ui->ResistInResultLbl->setText("-");    // Сам InResist при рассчёте заменяется NaN на 0
     else
-    {
         ui->ResistInResultLbl->setNum(newInResist);
-    }
 }
 
 void Demonstration::setGridChars()
@@ -106,7 +176,7 @@ void Demonstration::setGridChars()
 void Demonstration::chosenMinusPlus()
 {
     Chain.Lamp.SetCurConnection(Connection::minus);
-    chosenPolar(*(ui->MinusPlus), *(ui->PlusMinus));
+    TriodDemo->changePolar(Connection::minus);
     ui->ResistGridSlider->setRange(0, 400);
     changePhysics();
 }
@@ -114,7 +184,7 @@ void Demonstration::chosenMinusPlus()
 void Demonstration::chosenPlusMinus()
 {
     Chain.Lamp.SetCurConnection(Connection::plus);
-    chosenPolar(*(ui->PlusMinus), *(ui->MinusPlus));
+    TriodDemo->changePolar(Connection::plus);
     ui->ResistGridSlider->setRange(0, 160);
     changePhysics();
 }
@@ -137,26 +207,10 @@ void Demonstration::setUoltSliderView()
     ui->UoltAnodSlider->setTickPosition(QSlider::TicksBelow);
 }
 
-void Demonstration::on_goMenu_clicked()
-{
-    emit back_toMenu();
-}
-
-void Demonstration::on_MinusPlus_clicked()
-{
-    chosenMinusPlus();
-}
-
-void Demonstration::on_PlusMinus_clicked()
-{
-    chosenPlusMinus();
-}
-
 void Demonstration::on_ResistGridSlider_valueChanged(int value)
 {
     Chain.SetLastIntenseForce();
     Chain.Lamp.ChangeLastUoltGrid();
-
     Chain.Lamp.SetResistGrid(value);
     ui->ResistGridLbl->setNum(value);
     changePhysics();
@@ -167,16 +221,13 @@ void Demonstration::on_UoltAnodSlider_valueChanged(int value)
 {
     Chain.SetLastUoltAnod();
     Chain.SetLastIntenseForce();
-
     Chain.SetUoltAnod(value);
     ui->UoltAnodLbl->setNum(value);
     changePhysics();
     setAnodChars();
 }
 
-void Demonstration::on_pushButton_clicked()
+void Demonstration::on_goMenu_clicked()
 {
-    TriodDemo->animationGo();
-    ui->graphicsView->setScene(TriodDemo);
-    ui->graphicsView->show();
+    emit back_toMenu();
 }

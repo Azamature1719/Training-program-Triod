@@ -1,18 +1,34 @@
 #include "triodlamp.h"
-#include <QRadialGradient>
-#include <QPropertyAnimation>
-#include <QSize>
+#include "demonstration.h"
+#include <QStateMachine>
+#include <QState>
 
 TriodLamp::TriodLamp(QRect rect)
-    :QGraphicsScene(rect), boundaries(new QRect(rect)),
+    :QGraphicsScene(rect),
+     boundaries(new QRect(rect)),
      cloudBound(new QRect(55, boundaries->height()/2 - 57, boundaries->width()*0.7, 80)),
      electronSize(new QSize(10, 10))
 {
-    electron = new Electron;
-    currentFlow = new QStateMachine;
+    electron   = new Electron;
+    cloud      = new Cloud();
+    triple     = new QParallelAnimationGroup;
+    operCur    = new QParallelAnimationGroup;
+    operClosed = new QParallelAnimationGroup;
+    operLow    = new QParallelAnimationGroup;
+    operHigh   = new QParallelAnimationGroup;
+    test = new QSequentialAnimationGroup;
+    operOpened = new QParallelAnimationGroup;
 
     setupPictures();
-    animationGo();
+    fillAnimation();
+    lastConnect = Connection::minus;
+    timer = new QTimer();
+
+    connect(this, SIGNAL(go_lamp_closed()), this, SLOT(lamp_closed_GO()));
+    connect(this, SIGNAL(go_cur_low()), this, SLOT(cur_low_GO()));
+    connect(this, SIGNAL(go_oper_current()), this, SLOT(oper_cur_GO()));
+    connect(this, SIGNAL(go_cur_high()), this, SLOT(cur_high_GO()));
+    connect(this, SIGNAL(go_lamp_opened()), this, SLOT(lamp_opened_GO()));
 }
 
 void TriodLamp::setupPictures()
@@ -25,7 +41,9 @@ void TriodLamp::setupPictures()
     this->addItem(sign);
     setMinus();
 
-    cloud = this->addEllipse(*cloudBound, QPen(Qt::transparent), QBrush(QColor::fromRgb(255, 255, 0),Qt::BrushStyle::Dense4Pattern));
+    cloud->setPen(QColor(Qt::transparent));
+    cloud->setRect(*cloudBound);
+    this->addItem(cloud);
 }
 
 void TriodLamp::setPlus()
@@ -44,60 +62,278 @@ void TriodLamp::setMinus()
 
 void TriodLamp::fillAnimation()
 {
-    for(size_t i = 0; i < 3; ++i)
+    for (size_t j = 0; j < 7; ++j)
     {
-        int xStart = -14, xMedium = -18;
-        for (size_t j = 0; j < 5; ++j)
-        {
-            Electron *elec = new Electron;
-            electroStream.push_back(elec);
-            this->addItem(elec);
+        Electron *elec = new Electron;
+        electroStream.push_back(elec);
+        this->addItem(elec);
 
-            QPropertyAnimation *anim = new QPropertyAnimation(elec, "geometry");
-            anim->setDuration(400 + rand()%1000);
-            anim->setEasingCurve(QEasingCurve::Linear);
-            anim->setStartValue(QRect(boundaries->width()/2 + xStart*error, boundaries->height()/2 + 12*error, 10, 10));
-            anim->setKeyValueAt(0.4, QRect(boundaries->width()/2 + xMedium*error, boundaries->height()/2 - 10*error, electron->width(), electron->height()));
-            anim->setKeyValueAt(0.7, QRect(boundaries->width()/2 + 2*error, electron->height() + 10*error, 10, 10));
-            anim->setEndValue(QRect(boundaries->width()/2 + 2*error, -10, 10, 10));
-
-            animaStream.push_back(anim);
-            xStart += 5;
-            xMedium += 9;
-        }
+        QPropertyAnimation *anim = new QPropertyAnimation(elec, "geometry");
+        anim->setEasingCurve(QEasingCurve::Linear);
+        animaStream.push_back(anim);
     }
-}
 
-
-
-void TriodLamp::animationGo()
-{
-    QParallelAnimationGroup *triple = new QParallelAnimationGroup,
-                            *triple2 = new QParallelAnimationGroup,
-                            *triple3 = new QParallelAnimationGroup;
-    fillAnimation();
-
-    for(int j = 0; j < 5; ++j)
+    for(int j = 0; j < 7; ++j)
     {
         triple->addAnimation(animaStream[j]);
-        qDebug() << j;
-    }
-    for(int j = 5; j < 10; ++j)
-    {
-        triple2->addAnimation(animaStream[j]);
-        qDebug() << j;
-    }
-    for(int j = 10; j < 15; ++j)
-    {
-        triple3->addAnimation(animaStream[j]);
-        qDebug() << j;
     }
 
-    QSequentialAnimationGroup *forward = new QSequentialAnimationGroup;
-    forward->addAnimation(triple);
-    forward->addAnimation(triple2);
-    forward->addAnimation(triple3);
-    forward->setLoopCount(1000);
-    forward->start();
+    operLow->setLoopCount(-1);
+    operHigh->setLoopCount(-1);
+    operOpened->setLoopCount(-1);
+    operClosed->setLoopCount(-1);
+    operCur->setLoopCount(-1);
 }
 
+void TriodLamp::lampClosed()
+{
+    int xStart = XStart;
+    for(int i = 0; i < animaStream.size(); ++i)
+    {
+        if(i == 0 || i == 6)
+            animaStream[i]->setDuration(200 + rand()%1000);
+        else
+            animaStream[i]->setDuration(100 + rand()%1000);
+
+        if(i == 0)
+        {
+            animaStream[i]->setStartValue(QRect(boundaries->width()/2 + xStart*error, boundaries->height()/2 + 17*error, 20, 20));
+            animaStream[i]->setEndValue(QRect(boundaries->width()/2 + xStart*error, boundaries->height()/2 + 17*error, 20, 20));
+        }
+        else if(i == 1)
+        {
+            animaStream[i]->setStartValue(QRect(boundaries->width()/2 + xStart*error, boundaries->height()/2 + 14*error, 20, 20));
+            animaStream[i]->setEndValue(QRect(boundaries->width()/2 + xStart*error, boundaries->height()/2 + 14*error, 20, 20));
+        }
+        else if(i == 5)
+        {
+            animaStream[i]->setStartValue(QRect(boundaries->width()/2 + xStart*error, boundaries->height()/2 + 14*error, 20, 20));
+            animaStream[i]->setEndValue(QRect(boundaries->width()/2 + xStart*error, boundaries->height()/2 + 14*error, 20, 20));
+        }
+        else if(i == 6)
+        {
+            animaStream[i]->setStartValue(QRect(boundaries->width()/2 + xStart*error - 6, boundaries->height()/2 + 17*error, 20, 20));
+            animaStream[i]->setEndValue(QRect(boundaries->width()/2 + xStart*error - 6, boundaries->height()/2 + 17*error, 20, 20));
+        }
+        else
+        {
+            animaStream[i]->setStartValue(QRect(boundaries->width()/2 + xStart*error, boundaries->height()/2 + 12*error, 20, 20));
+            animaStream[i]->setEndValue(QRect(boundaries->width()/2 + xStart*error, boundaries->height()/2 + 12*error, 20, 30));
+        }
+
+        animaStream[i]->setKeyValueAt(0.4, QRect(boundaries->width()/2 + xStart*error, boundaries->height()/2 + 9*error, 20, 20));
+        animaStream[i]->setKeyValueAt(0.7, QRect(boundaries->width()/2 + xStart*error, boundaries->height()/2 + 4*error, 20, 20));
+        xStart += 5;
+    }
+    operClosed->addAnimation(triple);
+}
+
+void TriodLamp::currentLow()
+{
+    int xStart = XStart, xMedium = XMedium + 6;
+    for(int i = 0; i < animaStream.size(); i+=2)
+    {
+        animaStream[i]->setDuration(300 + rand()%1000);
+        if(i == 0)
+        {
+            animaStream[i]->setStartValue(QRect(boundaries->width()/2 + xStart*error, boundaries->height()/2 + 17*error, 20, 20));
+            animaStream[i]->setEndValue(QRect(boundaries->width()/2 + xStart*error, boundaries->height()/2 + 17*error, 20, 20));
+        }
+        else if(i == 6)
+        {
+            animaStream[i]->setStartValue(QRect(boundaries->width()/2 + xStart*error - 6, boundaries->height()/2 + 17*error, 20, 20));
+            animaStream[i]->setEndValue(QRect(boundaries->width()/2 + xStart*error - 6, boundaries->height()/2 + 17*error, 20, 20));
+        }
+        else
+        {
+           animaStream[i]->setStartValue(QRect(boundaries->width()/2 + xStart*error, boundaries->height()/2 + 10*error, 20, 20));
+           animaStream[i]->setEndValue(QRect(boundaries->width()/2 + xStart*error, boundaries->height()/2 + 10*error, 20, 20));
+        }
+        animaStream[i]->setKeyValueAt(0.4, QRect(boundaries->width()/2 + xStart*error, boundaries->height()/2 + 5*error, 20, 20));
+        animaStream[i]->setKeyValueAt(0.7, QRect(boundaries->width()/2 + xStart*error, boundaries->height()/2, 20, 20));
+        xStart += 10;
+    }
+
+    xStart = -4;
+    for(int i = 1; i < animaStream.size(); i+=2)
+    {
+        animaStream[i]->setDuration(500 + rand()%2000);
+        animaStream[i]->setStartValue(QRect(boundaries->width()/2 + xStart*error, boundaries->height()/2 + 12*error, 10, 10));
+        animaStream[i]->setKeyValueAt(0.4, QRect(boundaries->width()/2 + xMedium*error, boundaries->height()/2 - 10*error, electron->width(), electron->height()));
+        animaStream[i]->setKeyValueAt(0.7, QRect(boundaries->width()/2 + 2*error, electron->height() + 5*error, 10, 10));
+        animaStream[i]->setEndValue(QRect(boundaries->width()/2 + 2*error, (-1)*(8+rand()%10), 10, 10));
+        xStart += 10;
+        xMedium += 12;
+    }
+    operLow->addAnimation(triple);
+}
+
+void TriodLamp::operatingCurrent()
+{
+    int xStart = XStart, xMedium = XMedium;
+
+    for(int i = 0; i < animaStream.size(); ++i)
+    {
+        animaStream[i]->setDuration(200 + rand()%2000);
+        animaStream[i]->setStartValue(QRect(boundaries->width()/2 + xStart*error, boundaries->height()/2 + 12*error, 10, 10));
+        animaStream[i]->setKeyValueAt(0.4, QRect(boundaries->width()/2 + xMedium*error, boundaries->height()/2 - 10*error, electron->width(), electron->height()));
+        animaStream[i]->setKeyValueAt(0.7, QRect(boundaries->width()/2 + 2*error, electron->height() + 7*error, 10, 10));
+        animaStream[i]->setEndValue(QRect(boundaries->width()/2 + 2*error, (-1)*(8+rand()%10), 10, 10));
+        xStart += 5;
+        xMedium += 6;
+    }
+    operCur->addAnimation(triple);
+}
+
+void TriodLamp::currentHigh()
+{
+    int xStart = XStart + 3,
+        xMedium = XMedium + 2;
+
+    for(int i = 0; i < animaStream.size(); i+=2)
+    {
+        animaStream[i]->setDuration(500 + rand()%500);
+        animaStream[i]->setStartValue(QRect(boundaries->width()/2 + xMedium*error, boundaries->height()/2 - 5*error, 20, 20));
+        animaStream[i]->setKeyValueAt(0.4, QRect(boundaries->width()/2 + xMedium*error, boundaries->height()/2 - 12*error, 20, 20));
+        animaStream[i]->setKeyValueAt(0.7, QRect(boundaries->width()/2 + xMedium*error,  boundaries->height()/2 + 2*error, 20, 20));
+        animaStream[i]->setEndValue(QRect(boundaries->width()/2 + xMedium*error, boundaries->height()/2 - 5*error, 20, 20));
+        xStart += 10;
+        xMedium += 11;
+    }
+
+    xStart  = XStart + 5;
+    xMedium = XMedium + 6;
+    for(int i = 1; i < animaStream.size(); i+=2)
+    {
+        animaStream[i]->setDuration(500 + rand()%1000);
+        animaStream[i]->setStartValue(QRect(boundaries->width()/2 + xStart*error, boundaries->height()/2 + 12*error, 10, 10));
+        animaStream[i]->setKeyValueAt(0.4, QRect(boundaries->width()/2 + xMedium*error, boundaries->height()/2 - 10*error, electron->width(), electron->height()));
+        animaStream[i]->setKeyValueAt(0.7, QRect(boundaries->width()/2 + 2*error, electron->height() + 5*error, 10, 10));
+        animaStream[i]->setEndValue(QRect(boundaries->width()/2 + 2*error, (-1)*(8+rand()%10), 10, 10));
+        xStart += 10;
+        xMedium += 12;
+    }
+    operHigh->addAnimation(triple);
+}
+
+void TriodLamp::lampOpened()
+{
+    int xStart = XStart + 3,
+    xMedium = XMedium + 2;
+
+    for(int i = 0; i < animaStream.size(); i+=2)
+    {
+        animaStream[i]->setDuration(500 + rand()%1500);
+        animaStream[i]->setStartValue(QRect(boundaries->width()/2 + xStart*error, boundaries->height()/2 + 12*error, 10, 10));
+        animaStream[i]->setKeyValueAt(0.4, QRect(boundaries->width()/2 + xMedium*error, boundaries->height()/2 - 10*error, 30, 30));
+        animaStream[i]->setKeyValueAt(0.7, QRect(boundaries->width()/2 + xMedium*error, boundaries->height()/2 - 5*error, 30, 30));
+        animaStream[i]->setEndValue(QRect((-1)*(8+rand()%10), boundaries->height()/2 - 5*error, 10, 10));
+        xStart += 10;
+        xMedium += 11;
+    }
+
+    xStart  = XStart + 5;
+    xMedium = XMedium + 6;
+    for(int i = 1; i < animaStream.size(); i+=2)
+    {
+        animaStream[i]->setDuration(500 + rand()%2000);
+        animaStream[i]->setStartValue(QRect(boundaries->width()/2 + xStart*error, boundaries->height()/2 + 12*error, 10, 10));
+        animaStream[i]->setKeyValueAt(0.4, QRect(boundaries->width()/2 + xMedium*error, boundaries->height()/2 - 10*error, electron->width(), electron->height()));
+        animaStream[i]->setKeyValueAt(0.7, QRect(boundaries->width()/2 + 2*error, electron->height() + 5*error, 10, 10));
+        animaStream[i]->setEndValue(QRect(boundaries->width()/2 + 2*error, (-1)*(8+rand()%10), 10, 10));
+        xStart += 10;
+        xMedium += 12;
+    }
+    operOpened->addAnimation(triple);
+}
+
+/// Пускатель сигналов
+void TriodLamp::signal_SEND(LampMode curMode)
+{
+    switch(curMode)
+    {
+    case(LampMode::closed):
+        emit go_lamp_closed();
+        return;
+
+    case(LampMode::almostClosed):
+        emit go_cur_low();
+        return;
+
+    case(LampMode::working):
+        emit go_oper_current();
+        return;
+
+    case(LampMode::almostOpened):
+        emit go_cur_high();
+        return;
+
+    case(LampMode::opened):
+        emit go_lamp_opened();
+        return;
+    }
+}
+
+
+void TriodLamp::changePolar(Connection sign)
+{
+    if(sign != lastConnect)
+    {
+        switch(sign)
+        {
+        case Connection::plus:
+            setPlus();
+            break;
+
+        case Connection::minus:
+            setMinus();
+            break;
+        }
+        lastConnect = sign;
+    }
+}
+
+void TriodLamp::changeColourCloud(double uoltGrid)
+{
+    int red = 255, green = 255, blue = 255;
+    QColor neededColor;
+
+    if(uoltGrid <= 0)
+        neededColor = (QColor::fromRgb(red + int(uoltGrid*100/2), green + int(uoltGrid*100/2), blue));
+
+    if(uoltGrid > 0)
+        neededColor = (QColor::fromRgb(red, green, blue - int(uoltGrid*127.5)));
+
+    cloud->startTransit(neededColor);
+}
+
+void TriodLamp::lamp_closed_GO()
+{
+    lampClosed();
+    operClosed->start();
+}
+
+void TriodLamp::cur_low_GO()
+{
+    // timer->singleShot(operLow->duration(), this, SLOT(oper_cur_GO()));
+    currentLow();
+    operLow->start();
+}
+
+void TriodLamp::oper_cur_GO()
+{
+    operatingCurrent();
+    operCur->start();
+}
+
+void TriodLamp::cur_high_GO()
+{
+    currentHigh();
+    operHigh->start();
+}
+
+void TriodLamp::lamp_opened_GO()
+{
+    lampOpened();
+    operOpened->start();
+}

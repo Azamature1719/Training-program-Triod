@@ -54,9 +54,6 @@ int ElectroChain::GetUoltDifference()
 double ElectroChain::GetIntenseDifference()
 {
     double dif = LastIntenseForce - IntenseForce;
-    std::cout << "\nLast = " << LastIntenseForce
-              << "  Cur = " << IntenseForce
-              << "  Dif = " << dif;
     return (CorrectFloor(fabs(dif)));
 }
 

@@ -6,6 +6,7 @@
 #include <QtSvg>
 #include <QGraphicsScene>
 #include "clickablelabel.h"
+#include "chaindemo.h"
 #include "commonenum.h"
 #include "electrochain.h"
 #include "triodlamp.h"
@@ -23,28 +24,32 @@ public:
     ~Demonstration();
 
 signals:
+    void minus_plus();
+    void plus_minus();
     void back_toMenu();
 
 private slots:
     void on_goMenu_clicked();
-    void on_PlusMinus_clicked();
-    void on_MinusPlus_clicked();
     void on_ResistGridSlider_valueChanged(int value);
     void on_UoltAnodSlider_valueChanged(int value);
 
-    void on_pushButton_clicked();
 
 private:
     ElectroChain Chain;
     TriodLamp *TriodDemo;
+    ChainDemo *ElChainDemo;
+    std::string lastMode = "";
 
     // Физические параметры
     Connection connectCur;
 
     // Параметры отрисовки
     Ui::Demonstration *ui;
-    QPixmap *minusPlus = new QPixmap,
-            *plusMinus = new QPixmap;
+    QGraphicsSvgItem *minusPlus,
+                      *plusMinus;
+
+    // Для отслеживания нажатия на тип подключения
+    void mousePressEvent(QMouseEvent *event);
 
     // Функции отрисовки
     void setConnectionIcons(); // -- загрузка изображений типа подключения --

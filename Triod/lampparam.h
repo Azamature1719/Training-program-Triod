@@ -13,8 +13,9 @@ class LampParam
    double CoForce;
    double InResist;
    Connection curConnection;
+
    LampMode curMode;
-   std::string strCurMode;
+   LampMode prevCurMode;
 
    // Для вычисления характеристик триода
    double LastUoltGrid;
@@ -32,9 +33,10 @@ public:
     // Получить параметры триода
     Connection  GetCurConnection();
     LampMode    GetLampMode();
-    std::string GetStrLampMode();
+    LampMode    GetPrevLampMode();
     int    GetResistGrid();
     double GetUoltGrid();
+    double GetLastUoltGrid();
     int    GetCoefficientForce();
     double GetCoefficientA();
 

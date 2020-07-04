@@ -17,6 +17,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    chaindemo.cpp \
     clickablelabel.cpp \
     cloud.cpp \
     demonstration.cpp \
@@ -30,6 +31,7 @@ SOURCES += \
     triodlamp.cpp
 
 HEADERS += \
+    chaindemo.h \
     clickablelabel.h \
     cloud.h \
     commonenum.h \

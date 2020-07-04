@@ -2,18 +2,29 @@
 #define CLOUD_H
 
 #include <QObject>
-#include <QGraphicsPixmapItem>
+#include <QPropertyAnimation>
+#include <QGraphicsScene>
+#include <QGraphicsEllipseItem>
 
-class Cloud:public QGraphicsPixmapItem
+class Cloud : public QObject, public QGraphicsEllipseItem
 {
+    Q_OBJECT
+
+    Q_PROPERTY(QColor background
+               READ getBackground
+               WRITE setBackground)
 
 public:
     Cloud();
     virtual ~Cloud() {}
 
+    QColor getBackground() const;
+    void setBackground(const QColor& back);
+    void startTransit(const QColor& newBack);
+
 private:
-    QGraphicsEllipseItem *cloud;
-    QPixmap *sign;
+    QColor background;
+    QPropertyAnimation anim;
 };
 
 #endif // CLOUD_H

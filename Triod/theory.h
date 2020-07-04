@@ -2,6 +2,7 @@
 #define THEORY_H
 
 #include <QWidget>
+#include <QMessageBox>
 
 namespace Ui {
 class Theory;
