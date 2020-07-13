@@ -27,11 +27,17 @@
      <widget class="ClickableLabel" name="goTheory">
       <property name="geometry">
        <rect>
-        <x>120</x>
-        <y>193</y>
+        <x>170</x>
+        <y>250</y>
         <width>861</width>
         <height>131</height>
        </rect>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
       </property>
       <property name="font">
        <font>
@@ -55,8 +61,8 @@
      <widget class="ClickableLabel" name="goExam">
       <property name="geometry">
        <rect>
-        <x>120</x>
-        <y>590</y>
+        <x>170</x>
+        <y>647</y>
         <width>861</width>
         <height>131</height>
        </rect>
@@ -83,8 +89,8 @@
      <widget class="ClickableLabel" name="goDemo">
       <property name="geometry">
        <rect>
-        <x>120</x>
-        <y>391</y>
+        <x>170</x>
+        <y>448</y>
         <width>861</width>
         <height>131</height>
        </rect>
@@ -103,6 +109,64 @@
       </property>
       <property name="text">
        <string>Практикум</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+     <widget class="QLabel" name="goTheory_2">
+      <property name="geometry">
+       <rect>
+        <x>160</x>
+        <y>40</y>
+        <width>861</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>Verdana</family>
+        <pointsize>28</pointsize>
+       </font>
+      </property>
+      <property name="cursor">
+       <cursorShape>PointingHandCursor</cursorShape>
+      </property>
+      <property name="mouseTracking">
+       <bool>true</bool>
+      </property>
+      <property name="text">
+       <string>Учебно демонстрационная программа</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+     <widget class="QLabel" name="goTheory_3">
+      <property name="geometry">
+       <rect>
+        <x>150</x>
+        <y>110</y>
+        <width>861</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>Verdana</family>
+        <pointsize>28</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="cursor">
+       <cursorShape>PointingHandCursor</cursorShape>
+      </property>
+      <property name="mouseTracking">
+       <bool>true</bool>
+      </property>
+      <property name="text">
+       <string>Электровакуумные лампы. Триод</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>

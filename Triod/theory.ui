@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1081</width>
+    <width>1212</width>
     <height>950</height>
    </rect>
   </property>
@@ -16,9 +16,9 @@
   <widget class="ClickableLabel" name="goMenu">
    <property name="geometry">
     <rect>
-     <x>360</x>
+     <x>800</x>
      <y>860</y>
-     <width>361</width>
+     <width>381</width>
      <height>61</height>
     </rect>
    </property>
@@ -40,39 +40,144 @@
     <set>Qt::AlignCenter</set>
    </property>
   </widget>
-  <widget class="QTextBrowser" name="textBrowser">
+  <widget class="QLabel" name="goMenu_2">
+   <property name="geometry">
+    <rect>
+     <x>290</x>
+     <y>10</y>
+     <width>591</width>
+     <height>71</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Verdana</family>
+     <pointsize>30</pointsize>
+     <weight>75</weight>
+     <bold>true</bold>
+     <stylestrategy>PreferAntialias</stylestrategy>
+    </font>
+   </property>
+   <property name="text">
+    <string>Триод. Краткая справка</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QGraphicsView" name="graphicsView">
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>80</y>
-     <width>1011</width>
-     <height>771</height>
+     <y>100</y>
+     <width>1141</width>
+     <height>651</height>
     </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>10</width>
+     <height>10</height>
+    </size>
    </property>
    <property name="frameShape">
     <enum>QFrame::NoFrame</enum>
    </property>
+   <property name="frameShadow">
+    <enum>QFrame::Plain</enum>
+   </property>
+   <property name="lineWidth">
+    <number>0</number>
+   </property>
+   <property name="verticalScrollBarPolicy">
+    <enum>Qt::ScrollBarAsNeeded</enum>
+   </property>
+   <property name="horizontalScrollBarPolicy">
+    <enum>Qt::ScrollBarAsNeeded</enum>
+   </property>
+   <property name="sizeAdjustPolicy">
+    <enum>QAbstractScrollArea::AdjustIgnored</enum>
+   </property>
+   <property name="renderHints">
+    <set>QPainter::HighQualityAntialiasing|QPainter::TextAntialiasing</set>
+   </property>
   </widget>
-  <widget class="ClickableLabel" name="goMenu_2">
+  <widget class="ClickableLabel" name="first">
    <property name="geometry">
     <rect>
-     <x>330</x>
-     <y>10</y>
-     <width>431</width>
+     <x>40</x>
+     <y>780</y>
+     <width>361</width>
      <height>51</height>
     </rect>
    </property>
    <property name="font">
     <font>
      <family>Verdana</family>
-     <pointsize>24</pointsize>
+     <pointsize>22</pointsize>
      <weight>50</weight>
      <bold>false</bold>
-     <stylestrategy>PreferAntialias</stylestrategy>
     </font>
    </property>
+   <property name="cursor">
+    <cursorShape>PointingHandCursor</cursorShape>
+   </property>
    <property name="text">
-    <string>Триод. Краткая справка</string>
+    <string>Строение триода</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="ClickableLabel" name="second">
+   <property name="geometry">
+    <rect>
+     <x>420</x>
+     <y>780</y>
+     <width>361</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Verdana</family>
+     <pointsize>22</pointsize>
+     <weight>50</weight>
+     <bold>false</bold>
+    </font>
+   </property>
+   <property name="cursor">
+    <cursorShape>PointingHandCursor</cursorShape>
+   </property>
+   <property name="text">
+    <string>Рабочие режимы</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="ClickableLabel" name="third">
+   <property name="geometry">
+    <rect>
+     <x>800</x>
+     <y>780</y>
+     <width>381</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Verdana</family>
+     <pointsize>22</pointsize>
+     <weight>50</weight>
+     <bold>false</bold>
+    </font>
+   </property>
+   <property name="cursor">
+    <cursorShape>PointingHandCursor</cursorShape>
+   </property>
+   <property name="text">
+    <string>Физ. характеристики</string>
    </property>
    <property name="alignment">
     <set>Qt::AlignCenter</set>

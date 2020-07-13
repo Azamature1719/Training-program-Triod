@@ -35,7 +35,7 @@ class Exam : public QWidget
     {
         int type = closed_answer;
         QString text = "";
-        std::array<answer, 3> variants;
+        std::array<answer, 4> variants;
     };
 
     std::string questionnaire;
@@ -59,6 +59,10 @@ public:
     void make_question();    // Функция формирования вопроса
 
 private slots:
+
+    void menuGO();
+    void concludeGO();
+    void beginGO();
 
     void on_beginTest_clicked();    // Начать тест
     void on_backToMenu_clicked();   // Вернуться в главное меню

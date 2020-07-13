@@ -29,10 +29,9 @@ signals:
     void back_toMenu();
 
 private slots:
-    void on_goMenu_clicked();
+    void on_goToMenu_clicked();
     void on_ResistGridSlider_valueChanged(int value);
     void on_UoltAnodSlider_valueChanged(int value);
-
 
 private:
     ElectroChain Chain;
@@ -52,15 +51,15 @@ private:
     void mousePressEvent(QMouseEvent *event);
 
     // Функции отрисовки
-    void setConnectionIcons(); // -- загрузка изображений типа подключения --
-    void setResistSliderView();// -- установка параметры ползунка сопротивления --
-    void setUoltSliderView();  // -- установка параметры ползунка напряжения --
-    void setAnodChars();       // -- установка значений анодных характеристик --
-    void setGridChars();       // -- установка значений сеточных характеристик --
-    void chosenPolar(ClickableLabel &on, ClickableLabel &off);  // -- выбрано подключение --
-    void chosenPlusMinus();    // -- выбран тип подключения (+-) --
-    void chosenMinusPlus();    // -- выбран тип подключения (-+) --
-    void changePhysics();      // -- изменяется напряжение на сетке и сила тока --
+    void setConnectionIcons(); // Загрузка изображений типа подключения
+    void setResistSliderView();// Установка параметры ползунка сопротивления
+    void setUoltSliderView();  // Установка параметры ползунка напряжения
+    void setAnodChars();       // Установка значений анодных характеристик
+    void setGridChars();       // Установка значений сеточных характеристик
+    void chosenPolar(ClickableLabel &on, ClickableLabel &off);  // Выбрано подключение
+    void chosenPlusMinus();    // Выбран тип подключения (+-)
+    void chosenMinusPlus();    // Выбран тип подключения (-+)
+    void changePhysics();      // Изменяется напряжение на сетке и сила тока
 };
 
 #endif // PRAKTIKUM_H

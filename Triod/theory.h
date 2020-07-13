@@ -3,6 +3,9 @@
 
 #include <QWidget>
 #include <QMessageBox>
+#include <QGraphicsScene>
+#include <QGraphicsPixmapItem>
+#include <QTimer>
 
 namespace Ui {
 class Theory;
@@ -22,7 +25,16 @@ signals:
 private slots:
     void on_goMenu_clicked();
 
+    void on_first_clicked();
+
+    void on_third_clicked();
+
+    void on_second_clicked();
+
 private:
+    int i = 0;
+    QGraphicsPixmapItem *item;
+    QGraphicsScene *scene;
     Ui::Theory *ui;
 };
 

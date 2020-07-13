@@ -10,7 +10,7 @@ TriodLamp::TriodLamp(QRect rect)
      electronSize(new QSize(10, 10))
 {
     electron   = new Electron;
-    cloud      = new Cloud();
+    cloud      = new Cloud;
     triple     = new QParallelAnimationGroup;
     operCur    = new QParallelAnimationGroup;
     operClosed = new QParallelAnimationGroup;
@@ -315,7 +315,6 @@ void TriodLamp::lamp_closed_GO()
 
 void TriodLamp::cur_low_GO()
 {
-    // timer->singleShot(operLow->duration(), this, SLOT(oper_cur_GO()));
     currentLow();
     operLow->start();
 }

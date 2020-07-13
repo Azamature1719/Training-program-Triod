@@ -2,9 +2,9 @@
 
 Cloud::Cloud()
 {
-    anim.setPropertyName("background");   // свойство для анимации
-    anim.setTargetObject(this);           // свойство какого объекта
-    anim.setDuration(700);                // продолжительность смены
+    anim.setPropertyName("background");   // Свойство для анимации
+    anim.setTargetObject(this);           // Свойство какого объекта
+    anim.setDuration(300);                // Продолжительность смены
 }
 
 QColor Cloud::getBackground() const
@@ -20,7 +20,7 @@ void Cloud::setBackground(const QColor &back)
 
 void Cloud::startTransit(const QColor &newBack)
 {
-    anim.setStartValue(background); // из какого цвета
-    anim.setEndValue(newBack);      // в какой
+    anim.setStartValue(background); // Из какого цвета
+    anim.setEndValue(newBack);      // В какой
     anim.start();
 }

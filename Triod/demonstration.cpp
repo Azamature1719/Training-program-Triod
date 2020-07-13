@@ -97,6 +97,7 @@ void Demonstration::changePhysics()
     // Изменить значения триода
     ui->UoltGridLbl->setNum(Chain.Lamp.GetUoltGrid());
     TriodDemo->changeColourCloud(Chain.Lamp.GetUoltGrid());
+    ElChainDemo->changeColourCloud(Chain.Lamp.GetUoltGrid());
 
     // Изменить значение силы тока
     ui->IntenseForceLbl->setNum(Chain.GetIntenseForce());
@@ -128,7 +129,7 @@ void Demonstration::changePhysics()
     ui->LampMode->setText(lampState.c_str());
 
     if(lastMode != lampState)
-        ui->LampMode->startTransit(Chain.Lamp.GetCurConnection());
+        ui->LampMode->startTransitMode(Chain.Lamp.GetCurConnection());
     lastMode = lampState;
 
     LampMode prevCurMode = Chain.Lamp.GetPrevLampMode();
@@ -227,7 +228,9 @@ void Demonstration::on_UoltAnodSlider_valueChanged(int value)
     setAnodChars();
 }
 
-void Demonstration::on_goMenu_clicked()
+void Demonstration::on_goToMenu_clicked()
 {
-    emit back_toMenu();
+    ui->goToMenu->startTransitTitles();
+    QTimer *timer = new QTimer;
+    timer->singleShot(500, this, SIGNAL(back_toMenu()));
 }

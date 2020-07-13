@@ -1,5 +1,8 @@
-#include "theory.h"
+ï»¿#include "theory.h"
 #include "ui_theory.h"
+#include <QGraphicsScene>
+#include <QGraphicsPixmapItem>
+#include <QPixmap>
 
 Theory::Theory(QWidget *parent) :
     QWidget(parent),
@@ -7,13 +10,23 @@ Theory::Theory(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    if (!QFile::exists("Files\theory_text.txt"))
+    if (!QFile::exists("Files/PNG/theory_text.png")   ||
+        !QFile::exists("Files/PNG/theory_text_2.png") ||
+        !QFile::exists("Files/PNG/theory_text_3.png"))
     {
-        QMessageBox::warning(this,"Îøèáêà","Íå óäàëîñü îòêðûòü ôàéë theory_text.txt");
+        QMessageBox::warning(this,"ÐžÑˆÐ¸Ð±ÐºÐ°","ÐÐµ ÑƒÐ´Ð°Ð»Ð¾ÑÑŒ Ð½Ð°Ð¹Ñ‚Ð¸ Ñ„Ð°Ð¹Ð»Ñ‹ Ñ Ñ‚ÐµÐ¾Ñ€Ð¸ÐµÐ¹");
     }
     else
     {
-        ui->textBrowser->setSource(QUrl("Files\theory_text.txt"));
+        scene = new QGraphicsScene(ui->graphicsView->rect());
+        scene->setSceneRect(0,0,1000,1100);
+
+        item = new QGraphicsPixmapItem;
+        on_first_clicked();
+
+        scene->addItem(item);
+        ui->graphicsView->setScene(scene);
+        ui->graphicsView->show();
     }
 }
 
@@ -24,5 +37,25 @@ Theory::~Theory()
 
 void Theory::on_goMenu_clicked()
 {
-    emit back_toMenu();
+    ui->goMenu->startTransitTitles();
+    QTimer *timer = new QTimer;
+    timer->singleShot(500, this, SIGNAL(back_toMenu()));
+}
+
+void Theory::on_first_clicked()
+{
+    item->setPixmap(QPixmap("Files/PNG/theory_text.png"));
+    ui->first->startTransitTitles();
+}
+
+void Theory::on_third_clicked()
+{
+    item->setPixmap(QPixmap("Files/PNG/theory_text_3.png"));
+    ui->third->startTransitTitles();
+}
+
+void Theory::on_second_clicked()
+{
+    item->setPixmap(QPixmap("Files/PNG/theory_text_2.png"));
+    ui->second->startTransitTitles();
 }

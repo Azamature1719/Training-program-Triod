@@ -8,6 +8,12 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    this->setMinimumSize(QSize(1238, 950));
+    this->setMaximumSize(QSize(1238, 750));
+
+
+    timer = new QTimer;
     connect(ui->theoryPage, SIGNAL(back_toMenu()), this, SLOT(on_goMenu_clicked()));
     connect(ui->demoPage, SIGNAL(back_toMenu()), this, SLOT(on_goMenu_clicked()));
     connect(ui->examPage, SIGNAL(back_toMenu()), this, SLOT(on_goMenu_clicked()));
@@ -25,20 +31,33 @@ void MainWindow::on_goMenu_clicked()
 
 void MainWindow::on_goTheory_clicked()
 {
-    ui->stackedWidget->setCurrentWidget(ui->theoryPage);
+    ui->goTheory->startTransitTitles();
+    timer->singleShot(200, this, SLOT(TheoryGo()));
 }
 
 void MainWindow::on_goDemo_clicked()
 {
-    ui->stackedWidget->setCurrentWidget(ui->demoPage);
+    ui->goDemo->startTransitTitles();
+    timer->singleShot(200, this, SLOT(DemoGo()));
 }
 
 void MainWindow::on_goExam_clicked()
 {
+    ui->goExam->startTransitTitles();
+    timer->singleShot(200, this, SLOT(ExamGo()));
+}
+
+void MainWindow::ExamGo()
+{
     ui->stackedWidget->setCurrentWidget(ui->examPage);
 }
 
-void MainWindow::on_goTheory_linkHovered(const QString &link)
+void MainWindow::TheoryGo()
 {
-    ui->goTheory->setStyleSheet("QLabel { background-color : lightgrey; }");
+    ui->stackedWidget->setCurrentWidget(ui->theoryPage);
+}
+
+void MainWindow::DemoGo()
+{
+    ui->stackedWidget->setCurrentWidget(ui->demoPage);
 }

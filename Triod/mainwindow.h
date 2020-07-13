@@ -22,9 +22,12 @@ private slots:
     void on_goDemo_clicked();
     void on_goExam_clicked();
 
-    void on_goTheory_linkHovered(const QString &link);
+    void ExamGo();
+    void TheoryGo();
+    void DemoGo();
 
 private:
+    QTimer *timer;
     Ui::MainWindow *ui;
 };
 #endif // MAINWINDOW_H

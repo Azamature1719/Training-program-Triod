@@ -25,9 +25,6 @@ private:
     void setMinus();
     void fillAnimation();
 
-    void changeMinus(double uoltGrid);
-    void changePlus(double uoltGrid);
-
     void allOff();
     void lampClosed();
     void currentLow();
@@ -42,7 +39,6 @@ public:
     void signal_SEND(LampMode mode);
     void changePolar(Connection sign);
     void changeColourCloud(double uoltGrid);
-
 
 private:
     int error = 5;
@@ -82,7 +78,6 @@ private slots:
     void oper_cur_GO();
     void cur_low_GO();
     void lamp_closed_GO();
-
 };
 
 #endif // TRIODLAMP_H

@@ -1,10 +1,11 @@
-#include <string>
+п»ї#include <string>
 #include <sstream>
 #include <ctime>
 #include <QMessageBox>
 #include <QRegExpValidator>
 #include <random>
 #include <fstream>
+#include <QTimer>
 #include "exam.h"
 #include "ui_exam.h"
 
@@ -14,9 +15,13 @@ Exam::Exam(QWidget *parent) :
     QWidget(parent), ui(new Ui::Exam)
 {
     ui->setupUi(this);
-    number_of_questions = 5;         // Количество вопросов - 5
-    ui->numOfQuest->setRange(5, 10); // В spinbox установить мин и макс значения ввода
-    questionnaire = read_testFile("Files/questions.txt"); // Считать в одну строку все вопросы
+    number_of_questions = 5;         // РљРѕР»РёС‡РµСЃС‚РІРѕ РІРѕРїСЂРѕСЃРѕРІ - 5
+    ui->numOfQuest->setRange(5, 15); // Р’ spinbox СѓСЃС‚Р°РЅРѕРІРёС‚СЊ РјРёРЅ Рё РјР°РєСЃ Р·РЅР°С‡РµРЅРёСЏ РІРІРѕРґР°
+    questionnaire = read_testFile("Files/questions.txt"); // РЎС‡РёС‚Р°С‚СЊ РІ РѕРґРЅСѓ СЃС‚СЂРѕРєСѓ РІСЃРµ РІРѕРїСЂРѕСЃС‹
+
+    QRegExp re("^[0-9]{1,}[.]{1}[0-9]{1,}$");
+    QRegExpValidator *validator = new QRegExpValidator(re, this);
+    ui->answerOpen->setValidator(validator);
 }
 
 Exam::~Exam()
@@ -25,7 +30,7 @@ Exam::~Exam()
 }
 
 /** ******************************************************************************* **/
-// Считать файл с вопросами
+// РЎС‡РёС‚Р°С‚СЊ С„Р°Р№Р» СЃ РІРѕРїСЂРѕСЃР°РјРё
 string Exam::read_testFile(const std::string &filename)
 {
    std::ifstream testFile(filename);
@@ -42,41 +47,41 @@ string Exam::read_testFile(const std::string &filename)
 }
 
 /** ******************************************************************************* **/
-// Начать выполнение тестирования
+// РќР°С‡Р°С‚СЊ РІС‹РїРѕР»РЅРµРЅРёРµ С‚РµСЃС‚РёСЂРѕРІР°РЅРёСЏ
 void Exam::begin_test()
 {
     time_t seed = time(nullptr);
     mt19937 mt(seed);
 
-    // Очистить все поля, которые заполняются во время прохождения теста
+    // РћС‡РёСЃС‚РёС‚СЊ РІСЃРµ РїРѕР»СЏ, РєРѕС‚РѕСЂС‹Рµ Р·Р°РїРѕР»РЅСЏСЋС‚СЃСЏ РІРѕ РІСЂРµРјСЏ РїСЂРѕС…РѕР¶РґРµРЅРёСЏ С‚РµСЃС‚Р°
     test_questions.clear();
     answers.cb_answer.clear();
     answers.open_answer.clear();
     ui->listWidget->clear();
     step = 0;
 
-    // Создать вопрос
+    // РЎРѕР·РґР°С‚СЊ РІРѕРїСЂРѕСЃ
     make_question();
 
-    // Перемещать все вопросы
+    // РџРµСЂРµРјРµС‰Р°С‚СЊ РІСЃРµ РІРѕРїСЂРѕСЃС‹
     shuffle(test_questions.begin(),test_questions.end(),mt);
 
-    // Проверить вопросы на наличие вопросы с открытым ответом
+    // РџСЂРѕРІРµСЂРёС‚СЊ РІРѕРїСЂРѕСЃС‹ РЅР° РЅР°Р»РёС‡РёРµ РІРѕРїСЂРѕСЃС‹ СЃ РѕС‚РєСЂС‹С‚С‹Рј РѕС‚РІРµС‚РѕРј
     for (question &quest : test_questions)
     {
-        // Если вопрос закрытого типа, перемешать варианты ответов
+        // Р•СЃР»Рё РІРѕРїСЂРѕСЃ Р·Р°РєСЂС‹С‚РѕРіРѕ С‚РёРїР°, РїРµСЂРµРјРµС€Р°С‚СЊ РІР°СЂРёР°РЅС‚С‹ РѕС‚РІРµС‚РѕРІ
         if (quest.type == closed_answer)
         {
-            shuffle(quest.variants.begin(),quest.variants.end(),mt);
+            shuffle(quest.variants.begin(),quest.variants.end()-1,mt);
         }
     }
 
-    // Вывести вопрос на экран
+    // Р’С‹РІРµСЃС‚Рё РІРѕРїСЂРѕСЃ РЅР° СЌРєСЂР°РЅ
     display_question();
 }
 
 /** ******************************************************************************* **/
-// Вывод вопроса на экран
+// Р’С‹РІРѕРґ РІРѕРїСЂРѕСЃР° РЅР° СЌРєСЂР°РЅ
 void Exam::display_question()
 {
     ui->textQuestiom->setText(test_questions[step].text);
@@ -85,13 +90,26 @@ void Exam::display_question()
     {
         case closed_answer:
         {
+            test_questions[step].variants[0].condition.push_front(' ');
+            test_questions[step].variants[1].condition.push_front(' ');
+            test_questions[step].variants[2].condition.push_front(' ');
+
             ui->QuestionTypes->setCurrentWidget(ui->close);
             ui->answer1T->setText(test_questions[step].variants[0].condition);
             ui->answer2T->setText(test_questions[step].variants[1].condition);
             ui->answer3T->setText(test_questions[step].variants[2].condition);
+
+            ui->choice1->setAutoExclusive(false);
             ui->choice1->setChecked(false);
+            ui->choice1->setAutoExclusive(true);
+
+            ui->choice2->setAutoExclusive(false);
             ui->choice2->setChecked(false);
+            ui->choice2->setAutoExclusive(true);
+
+            ui->choice3->setAutoExclusive(false);
             ui->choice3->setChecked(false);
+            ui->choice3->setAutoExclusive(true);
         }
         break;
 
@@ -105,33 +123,33 @@ void Exam::display_question()
 }
 
 /** ******************************************************************************* **/
-// Функйия составления вопроса
+// Р¤СѓРЅРєР№РёСЏ СЃРѕСЃС‚Р°РІР»РµРЅРёСЏ РІРѕРїСЂРѕСЃР°
 void Exam::make_question()
 {
-    string temp_string; // Текущая строка
-    question buf;       // Буферный вопрос
+    string temp_string; // РўРµРєСѓС‰Р°СЏ СЃС‚СЂРѕРєР°
+    question buf;       // Р‘СѓС„РµСЂРЅС‹Р№ РІРѕРїСЂРѕСЃ
 
     stringstream ss(questionnaire);
     while (getline(ss, temp_string))
     {
-        buf.type = temp_string[1] - '0'; // Считать тип вопроса
+        buf.type = temp_string[1] - '0'; // РЎС‡РёС‚Р°С‚СЊ С‚РёРї РІРѕРїСЂРѕСЃР°
         buf.text = QString::fromStdString({temp_string.begin()+2, temp_string.end()});
 
-        switch (buf.type) // Перейти к соответствующему блоку в зависимости от типа вопроса
+        switch (buf.type) // РџРµСЂРµР№С‚Рё Рє СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰РµРјСѓ Р±Р»РѕРєСѓ РІ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ С‚РёРїР° РІРѕРїСЂРѕСЃР°
         {
-            case closed_answer: // Если вопрос закрытого типа
+            case closed_answer: // Р•СЃР»Рё РІРѕРїСЂРѕСЃ Р·Р°РєСЂС‹С‚РѕРіРѕ С‚РёРїР°
             {
-                buf.variants[0].correctness = true; // Первый ответ всегда верный
-                for (size_t i=0; i < 3; ++i) // Считать три варианта ответа на вопрос
+                buf.variants[0].correctness = true; // РџРµСЂРІС‹Р№ РѕС‚РІРµС‚ РІСЃРµРіРґР° РІРµСЂРЅС‹Р№
+                for (size_t i=0; i < 3; ++i) // РЎС‡РёС‚Р°С‚СЊ С‚СЂРё РІР°СЂРёР°РЅС‚Р° РѕС‚РІРµС‚Р° РЅР° РІРѕРїСЂРѕСЃ
                 {
                     getline(ss, temp_string);
                     buf.variants[i].condition = QString::fromStdString(temp_string);
                 }
-                answers.cb_answer.resize(number_of_questions,-1);
+                answers.cb_answer.resize(number_of_questions, 3);
             }
             break;
 
-            case open_answer: // Если вопрос открытого типа
+            case open_answer: // Р•СЃР»Рё РІРѕРїСЂРѕСЃ РѕС‚РєСЂС‹С‚РѕРіРѕ С‚РёРїР°
             {
                 getline(ss, temp_string);
                 buf.variants[0].condition = QString::fromStdString(temp_string).toLower();
@@ -139,15 +157,15 @@ void Exam::make_question()
             }
             break;
         }
-        test_questions.push_back(buf); // Занести вопрос в вектор
+        test_questions.push_back(buf); // Р—Р°РЅРµСЃС‚Рё РІРѕРїСЂРѕСЃ РІ РІРµРєС‚РѕСЂ
     }
 }
 
 /** ******************************************************************************* **/
-// Проверка ответов пользователя
+// РџСЂРѕРІРµСЂРєР° РѕС‚РІРµС‚РѕРІ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
 int Exam::check(vector<bool> &correct)
 {
-    int num_of_correct = 0;  // Кол-во правильных ответов
+    int num_of_correct = 0;  // РљРѕР»-РІРѕ РїСЂР°РІРёР»СЊРЅС‹С… РѕС‚РІРµС‚РѕРІ
 
     for (size_t i = 0; i < number_of_questions; ++i)
     {
@@ -156,20 +174,22 @@ int Exam::check(vector<bool> &correct)
 
         switch (test_questions[i].type)
         {
-            case closed_answer: // Если вопрос закрытого типа
+            case closed_answer: // Р•СЃР»Рё РІРѕРїСЂРѕСЃ Р·Р°РєСЂС‹С‚РѕРіРѕ С‚РёРїР°
             {
                 answer_num = answers.cb_answer[i];
-                if (test_questions[i].variants[size_t(answer_num)].correctness) // Если ответ правильный...
+                if (test_questions[i].variants[size_t(answer_num)].correctness) // Р•СЃР»Рё РѕС‚РІРµС‚ РїСЂР°РІРёР»СЊРЅС‹Р№...
                 {
-                    ++num_of_correct;  //... увеличить количество правильных ответов
-                    correct[i] = true; // Занести в
+                    ++num_of_correct;  // РЈРІРµР»РёС‡РёС‚СЊ РєРѕР»РёС‡РµСЃС‚РІРѕ РїСЂР°РІРёР»СЊРЅС‹С… РѕС‚РІРµС‚РѕРІ
+                    correct[i] = true; // Р—Р°РЅРµСЃС‚Рё РІ
                 }
             }
             break;
 
-            case open_answer:   // Если вопрос открытого типа
+            case open_answer:   // Р•СЃР»Рё РІРѕРїСЂРѕСЃ РѕС‚РєСЂС‹С‚РѕРіРѕ С‚РёРїР°
             {
                 answer_str = answers.open_answer[i];
+
+                qDebug() << answer_str << test_questions[i].variants[0].condition;
                 if (test_questions[i].variants[0].condition == answer_str)
                 {
                     ++num_of_correct;
@@ -185,24 +205,26 @@ int Exam::check(vector<bool> &correct)
 /** ******************************************************************************* **/
 void Exam::display_result()
 {
-    // Вектор правильно отвеченных вопросов
+    // Р’РµРєС‚РѕСЂ РїСЂР°РІРёР»СЊРЅРѕ РѕС‚РІРµС‡РµРЅРЅС‹С… РІРѕРїСЂРѕСЃРѕРІ
     vector<bool> correct(number_of_questions, false);
 
-    // Проверить ответы пользователя
+    // РџСЂРѕРІРµСЂРёС‚СЊ РѕС‚РІРµС‚С‹ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
     int right_answers = check(correct);
 
-    // Вывести вопросы, где были допущены ошибки
-    for(size_t i = 0; i < number_of_questions; ++i)
+    if(!ui->listWidget->count())
     {
-        if(!correct[i])
+        // Р’С‹РІРµСЃС‚Рё РІРѕРїСЂРѕСЃС‹, РіРґРµ Р±С‹Р»Рё РґРѕРїСѓС‰РµРЅС‹ РѕС€РёР±РєРё
+        for(size_t i = 0; i < number_of_questions; ++i)
         {
-            ui->listWidget->addItem(test_questions[i].text);
+            if(!correct[i])
+            {
+                ui->listWidget->addItem(test_questions[i].text);
+            }
         }
     }
 
-    // Посчитать количество правильных ответов и вывести оценку
+    // РџРѕСЃС‡РёС‚Р°С‚СЊ РєРѕР»РёС‡РµСЃС‚РІРѕ РїСЂР°РІРёР»СЊРЅС‹С… РѕС‚РІРµС‚РѕРІ Рё РІС‹РІРµСЃС‚Рё РѕС†РµРЅРєСѓ
     int result_percent = double(right_answers) / number_of_questions * 100;
-
     if (result_percent >= 80)
     {
         ui->Mark_2->setText("5");
@@ -222,39 +244,60 @@ void Exam::display_result()
 }
 
 /** ******************************************************************************* **/
-// Начать тест из главного окна
+// РќР°С‡Р°С‚СЊ С‚РµСЃС‚ РёР· РіР»Р°РІРЅРѕРіРѕ РѕРєРЅР°
 void Exam::on_beginTest_clicked()
 {
+    ui->beginTest->startTransitTitles();
+    QTimer *timer = new QTimer;
+    timer->singleShot(500, this, SLOT(beginGO()));
+}
+
+
+void Exam::beginGO()
+{
     ui->stackedWidget->setCurrentWidget(ui->exam);
-    begin_test(); // Функция, запускающая тестирование
+    begin_test(); // Р¤СѓРЅРєС†РёСЏ, Р·Р°РїСѓСЃРєР°СЋС‰Р°СЏ С‚РµСЃС‚РёСЂРѕРІР°РЅРёРµ
 }
 
 /** ******************************************************************************* **/
-// Вернуться из главного меню
+// Р’РµСЂРЅСѓС‚СЊСЃСЏ РёР· РіР»Р°РІРЅРѕРіРѕ РјРµРЅСЋ
 void Exam::on_backToMenu_clicked()
 {
-    emit back_toMenu();
+    ui->backToMenu->startTransitTitles();
+    QTimer *timer = new QTimer;
+    timer->singleShot(500, this, SIGNAL(back_toMenu()));
 }
 
 /** ******************************************************************************* **/
-// Вернуться в меню тестирование
+// Р’РµСЂРЅСѓС‚СЊСЃСЏ РІ РјРµРЅСЋ С‚РµСЃС‚РёСЂРѕРІР°РЅРёРµ
 void Exam::on_backToMenu_2_clicked()
 {
-    ui->stackedWidget->setCurrentWidget(ui->mainMenu);
+    ui->backToMenu_2->startTransitTitles();
+    QTimer *timer = new QTimer;
+    timer->singleShot(500, this, SLOT(menuGO()));
 }
 
 /** ******************************************************************************* **/
-// Заверщить тестирование
+// Р—Р°РІРµСЂС‰РёС‚СЊ С‚РµСЃС‚РёСЂРѕРІР°РЅРёРµ
 void Exam::on_conclude_clicked()
+{
+    ui->conclude->startTransitTitles();
+    QTimer *timer = new QTimer;
+    timer->singleShot(500, this, SLOT(concludeGO()));
+}
+
+void Exam::concludeGO()
 {
     ui->stackedWidget->setCurrentWidget(ui->result);
     display_result();
 }
 
 /** ******************************************************************************* **/
-// К прошлому вопросу
+// Рљ РїСЂРѕС€Р»РѕРјСѓ РІРѕРїСЂРѕСЃСѓ
 void Exam::on_previous_clicked()
 {
+    ui->previous->startTransitTitles();
+
     if (step > 0)
     {
         --step;
@@ -263,57 +306,66 @@ void Exam::on_previous_clicked()
 }
 
 /** ******************************************************************************* **/
-// К следующему вопросу
+// Рљ СЃР»РµРґСѓСЋС‰РµРјСѓ РІРѕРїСЂРѕСЃСѓ
 void Exam::on_next_clicked()
 {
     ++step;
+
     if (step <= size_t(number_of_questions-1))
     {
-        display_question();    // Если не последний вопрос, показать вопрос
+        ui->next->startTransitTitles();
+        display_question();    // Р•СЃР»Рё РЅРµ РїРѕСЃР»РµРґРЅРёР№ РІРѕРїСЂРѕСЃ, РїРѕРєР°Р·Р°С‚СЊ РІРѕРїСЂРѕСЃ
     }
     else if(step > size_t(number_of_questions-1))
     {
-        on_conclude_clicked(); // Последний вопрос, перейти к результатам
+        on_conclude_clicked(); // РџРѕСЃР»РµРґРЅРёР№ РІРѕРїСЂРѕСЃ, РїРµСЂРµР№С‚Рё Рє СЂРµР·СѓР»СЊС‚Р°С‚Р°Рј
     }
 }
 
 /** ******************************************************************************* **/
-// Переход в меню тестирования из поля результатов
+// РџРµСЂРµС…РѕРґ РІ РјРµРЅСЋ С‚РµСЃС‚РёСЂРѕРІР°РЅРёСЏ РёР· РїРѕР»СЏ СЂРµР·СѓР»СЊС‚Р°С‚РѕРІ
 void Exam::on_backToMenu_4_clicked()
+{
+    ui->backToMenu_4->startTransitTitles();
+    QTimer *timer = new QTimer;
+    timer->singleShot(500, this, SLOT(menuGO()));
+}
+
+void Exam::menuGO()
 {
     ui->stackedWidget->setCurrentWidget(ui->mainMenu);
 }
 
 /** ******************************************************************************* **/
-// Было выбрано количество вопросов
+// Р‘С‹Р»Рѕ РІС‹Р±СЂР°РЅРѕ РєРѕР»РёС‡РµСЃС‚РІРѕ РІРѕРїСЂРѕСЃРѕРІ
 void Exam::on_numOfQuest_valueChanged(int arg1)
 {
     number_of_questions = arg1;
 }
 
 /** ******************************************************************************* **/
-// Был выбран первый ответ
+// Р‘С‹Р» РІС‹Р±СЂР°РЅ РїРµСЂРІС‹Р№ РѕС‚РІРµС‚
 void Exam::on_choice1_clicked()
 {
      answers.cb_answer[step] = 0;
 }
 
 /** ******************************************************************************* **/
-// Был выбран второй ответ
+// Р‘С‹Р» РІС‹Р±СЂР°РЅ РІС‚РѕСЂРѕР№ РѕС‚РІРµС‚
 void Exam::on_choice2_clicked()
 {
     answers.cb_answer[step] = 1;
 }
 
 /** ******************************************************************************* **/
-// Был выбран третий ответ
+// Р‘С‹Р» РІС‹Р±СЂР°РЅ С‚СЂРµС‚РёР№ РѕС‚РІРµС‚
 void Exam::on_choice3_clicked()
 {
     answers.cb_answer[step] = 2;
 }
 
 /** ******************************************************************************* **/
-// Был внесён ответ в открытом вопросе
+// Р‘С‹Р» РІРЅРµСЃС‘РЅ РѕС‚РІРµС‚ РІ РѕС‚РєСЂС‹С‚РѕРј РІРѕРїСЂРѕСЃРµ
 void Exam::on_answerOpen_textEdited(const QString &arg1)
 {
     answers.open_answer[step] = arg1.toLower();
